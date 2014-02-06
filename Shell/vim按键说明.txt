@@ -18,7 +18,7 @@ n+Enter:光标向下移动n行
 /word：向下查找word  ？word：向上查找word
 n:重复前一个查找  N：与前一个查找反向
 :n1,n2s/word1/word2/g：在第n1到n2行之间寻找word1并替换成word2
-:1,$/word1/word2/g：在第1行到最后一行查找word1并替换成word2  :1,$s/word1/word2/gc：出现confirm提示
+:1,$s/word1/word2/g：在第1行到最后一行查找word1并替换成word2  :1,$s/word1/word2/gc：出现confirm提示
 
 删除，复制与粘贴
 x：向后删除  X：向前删除
