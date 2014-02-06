@@ -1,0 +1,16 @@
+				什么是shell和bash
+用户通过shell操作应用程序，让应用程序来指挥内核，从而内核完成我们所需要的硬件服务。
+用户->用户界面(shell,KDE,application)->内核(kernal)->硬件
+用户<-用户界面<-内核<-硬件
+在/etc/shells文件里记录了我们可以使用的shell，而bash(Bource Again Shell)是Linux默认的shell
+可以通过type command来查询command是否是bash的内置命令，可以无参，也可有有-t(列出执行依据)和-a
+
+				shell的变量功能
+变量的规则，显示和设置
+	shell变量只能以英文字母和数字组成，且不能以数字开头
+	变量赋值不能有空格，即var=shell，而var = shell是错的
+	单引号和双引号的区别:echo "$var" (结果是shell) echo '$var' (结果是$var)
+	变量支持转义字符\
+	系统默认的变量通常是大写的
+	unset可以取消变量，如unset var
+	在一般状态下，父进程的自定义变量在子进程内无法使用，除非用export将变量设置为环境变量
