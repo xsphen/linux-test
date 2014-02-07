@@ -14,3 +14,34 @@
 	系统默认的变量通常是大写的
 	unset可以取消变量，如unset var
 	在一般状态下，父进程的自定义变量在子进程内无法使用，除非用export将变量设置为环境变量
+	
+环境变量的功能
+	env :environment的缩写，列举出所有环境变量
+		常见的环境变量有：
+		HOME：代表用户的主文件夹，例如cd $HOME可以快速回到主文件夹目录
+		SHELL：显示当前环境使用的shell是哪个程序
+		HISTSIZE：显示历史命令记录的条数
+		LANG：语系数据
+		RANDOM：产生一个随机数
+		MAIL,PATH等
+	set :查看所有变量，包括用户自定义变量
+		$：代表目前shell的线程代号，即所谓的PID(Process ID),只要echo $$就可以直到当前的PID
+		?：代表上一次执行命令所回传的值，如果成功执行，返回的是0，否则返回一个非0值
+		OYTYPE,HOSTTYPE,MACHTYPE：与主机硬件与内核的等级有关
+	export :自定义变量转换成环境变量。用法是export $var，如果不接变量名，则显示所有环境变量
+
+影响显示结果的语系变量(locale)
+	locale :列出所有有关语系的变量，但通常更改LANG或者LC_ALL就可以同时改变其他相关变量了。详细内容可以man一下。乱码问题一般都是通过语系更改来解决的。
+
+变量的有效范围
+	环境变量相当与全局变量，自定义变量相当与局部变量
+	当启动一个shell时，操作系统会分配一个记忆块给shell用，环境变量便是存在此处。
+
+变量键盘读取，数组与声明
+	read :读取来自键盘输入的变量 -p可以接提示符 -t可以接等待的秒数
+	declare/typeset :声明变量的类型，如果不接参数，则跟set一样
+		-a :将variable声明为数组
+		-i :将variable声明为整型
+		-x :将variable声明为环境变量
+		-r ;将variable声明为readonly只读类型
+	数组声明为var[index]=content，只支持一维数组
