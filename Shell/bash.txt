@@ -45,3 +45,34 @@
 		-x :将variable声明为环境变量
 		-r ;将variable声明为readonly只读类型
 	数组声明为var[index]=content，只支持一维数组
+	
+与文件系统及程序的限制关系：ulimit
+	由于Linux是多用户同时工作的系统，如果用户不限制地使用系统资源，后果便是系统挂了。bash提供限制用户的某些系统资源的功能，包括可以打开的文件数量，可以使用的CPU时间，可以使用的内存总量等。即：
+	ulimit [-SHacdfltu] [配额]
+	-H :hard limit,严格的设置，必定不能超过这个设置的数值
+	-S :soft limit,警告的设置，一旦超过这个值，系统会发出警告。通常这个值比hard limit小
+	-a :后面不接参数，可列出所有的限制额度
+	-c :当某些进程发生错误时，系统可能会将该进程在内存中的信息写成文件(拍错用)，这种文件称为内核文件(core file),此为限制每个内核文件的最大容量
+	-f :设置此shell可以创建的最大文件容量，单位为KB
+	-d :进程可使用的最大断裂内存容量
+	-l :可用于锁定的内存量
+	-t :可使用的最大CPU时间，单位秒
+	-u :单一用户可以使用的最大进程数量
+	注意，一般身份用户如果以ulimit设置了-f的文件大小，那么她只能继续减小文件容量，而不能增大。
+
+变量内容的删除，替代与替换
+	删除和替代
+	${variable#keyWord}:从变量内容从头开始删除，直到匹配到第一个keyWord.
+	${variable##keyWorld}:从变量内容从头开始删除，直到匹配到最后一个keyWord.
+	${variable%keyWord}:从变量内容从尾开始删除，直到匹配到第一个keyWord.
+	${variable%%keyWord}:从变量内容从尾开始删除，直到匹配到最后一个keyWord.
+	${variable/oldWord/newWord}:将变量的第一个oldWord替换成newWord.
+	${variable//oldWord/newWord}:将变量内容的素有oldWord替换成newWord.
+	举例，假设variable="/Hello World/"
+	若输入echo ${variable#*l},*为通配符，则输出为lo World/
+	若输入echo ${variable##*l},则输出d/
+	同理，将#和##分别改成%和%%(注意通配符的位置改变，应该是从后匹配到前)则输出为/Hello Wor和/He
+
+	变量的测试与内容替换
+	举例new_var=${old_var-content}，有三种情况，如果old_var没有设置，则new_var=content,如果old_var为空串或者非空串，new_var=old_var。
+	还有许多例子，有-,:-,+,:+,=,:=,?,:?，详情查阅鸟哥私房菜基础篇P316。
