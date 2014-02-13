@@ -76,3 +76,23 @@
 	变量的测试与内容替换
 	举例new_var=${old_var-content}，有三种情况，如果old_var没有设置，则new_var=content,如果old_var为空串或者非空串，new_var=old_var。
 	还有许多例子，有-,:-,+,:+,=,:=,?,:?，详情查阅鸟哥私房菜基础篇P316。
+
+				命令别名与历史命令
+命令别名设置：alias, unalias
+	别名命令例子：alias vim="v"
+	取消别名：unalias v
+	alias不接参数：列出所有别名
+	PS：clear清屏，dir列出目录与文件
+
+历史命令：history
+	history：列出历史命令
+	-n：n是数字，列出最近的n条命令
+	-c：将目前shell中的所有history内容全部清楚
+	-a：将目前新增的history命令加入到hisfiles中，默认写入~/.bash_history
+	-r：将histfiles的内容读到当前shell的history记忆中
+	-w：将目前的history记忆写入到histfiles中
+
+	!n：n是数组，执行第n条命令
+	!command：执行最近的匹配command的命令
+	!!：执行上一条命令，相当与方向键上+enter
+	histfiles的记录数量取决与HISTSIZE,注销shell时，系统会将最近的history写入到.bash_history中。-w是强制写入。注意多用户使用时，.bash_history内容会被最后注销的用户的history记忆覆盖。
