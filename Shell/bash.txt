@@ -25,7 +25,7 @@
 		RANDOM：产生一个随机数
 		MAIL,PATH等
 	set :查看所有变量，包括用户自定义变量
-		$：代表目前shell的线程代号，即所谓的PID(Process ID),只要echo $$就可以直到当前的PID
+		$：代表目前shell的线程代号，即所谓的PID(Process ID),只要echo $$就可以知道当前的PID
 		?：代表上一次执行命令所回传的值，如果成功执行，返回的是0，否则返回一个非0值
 		OYTYPE,HOSTTYPE,MACHTYPE：与主机硬件与内核的等级有关
 	export :自定义变量转换成环境变量。用法是export $var，如果不接变量名，则显示所有环境变量
@@ -87,12 +87,12 @@
 历史命令：history
 	history：列出历史命令
 	-n：n是数字，列出最近的n条命令
-	-c：将目前shell中的所有history内容全部清楚
+	-c：将目前shell中的所有history内容全部清除
 	-a：将目前新增的history命令加入到hisfiles中，默认写入~/.bash_history
 	-r：将histfiles的内容读到当前shell的history记忆中
 	-w：将目前的history记忆写入到histfiles中
 
-	!n：n是数组，执行第n条命令
+	!n：n是数字，执行第n条命令
 	!command：执行最近的匹配command的命令
 	!!：执行上一条命令，相当与方向键上+enter
 	histfiles的记录数量取决与HISTSIZE,注销shell时，系统会将最近的history写入到.bash_history中。-w是强制写入。注意多用户使用时，.bash_history内容会被最后注销的用户的history记忆覆盖。
