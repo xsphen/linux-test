@@ -1,0 +1,67 @@
+<1>用户和用户组
+在Linux中有三种角色，分别是owner,group,others.
+三种角色对文件或文件夹有着不同的权限
+
+<2>文件权限
+文件权限分为三种r,w,x，分别代表read,write,execute
+可以通过ls -al查看当前文件夹下的所有文件的权限，格式如下
+[fileType][rwx][r-x][r--]  连接数  owner  group  文件大小(单位B)  最后修改时间  文件名
+fileType有d(目录),-(文件),l(连接文件)，b(设备文件里面的可供存储的接口设备),c(设备文件里面的串行端口设备，比如键盘)
+第一组[rwx]代表文件owner的权限,说明owner可以读/写/执行，第二组[r-x]代表文件用户组权限，说明用户组里的用户可以读/执行，第三组[r--]代表others只可以读。即，-代表无该权限
+
+<3>修改文件权限
+chgrp:修改文件所属用户组
+chgrp [-R] groupName file/dir
+注：-R是参数选项，代表递归。如果groupName不存在，则修改失败。本机groupName存在/etc/group中
+
+chown:修改文件所属用户
+chown [-R] ownerName file/dir
+注：fileName存在/etc/passwd中
+
+chmod:修改文件权限
+r:4, w:2, x:1
+如果有[fileType][rwx][r-x][r--]，说明权限为754,即简单地把rwx加起来
+故方法一为：chmod 754(任何rwx的组合都性) fileName
+方法二：
+chmod u=rwx,g=rx,o=r fileName
+方法三：
+如果想用户组拥有w权限，则可以这样
+chmod g+w fileName
+如果不清除u,g,o的权限，但希望所以角色都有w权限，可以这样
+chmod a+w fileName，其中a代表all。
+注：方法三中包含=,+,-。用法一致。
+
+PS：
+w权限是比较可怕的行为，特别是对于目录。比如目录d的权限是drwxrwxr--,当前用户是acbron,里面有个文件的权限是drwxr--r--，而文件所有者是dog.这时acbron只能看到该文件的存在，但不能打开，因为没有x权限，更别说是修改了(同样不具备w权限)。但该目录是acbron的，所以acbron可以删掉那个文件，因为他对该目录有w权限！
+
+<4>文件种类与拓展名
+文件种类
+	-:普通文件
+	ASCII:纯文本文件，可以用cat /path/to/fileName直接读取内容
+	binary:二进制文件
+	data:数据文件
+目录：d
+设备与设备文件：b，c
+socket: s
+pipe,FIFO: p
+link:相当于windows的快捷方式
+注：linux的文件拓展名主要用于说明该文件是什么类型的文件，且没有windows中“可执行文件”的说法，只要权限上有x，就可以执行。但不意味着可执行成功，这取决于文件是否有执行的能力。
+Linux的文件长度限制
+文件名：255个字符	目录：4096个字符
+
+<5>Linux目录配置
+Linux目录配置标准：FHS(FileSystem Hierarchy Standard) http://www.pathname.com/fhs/
+目录分为可分享和不可分享，也分为可变动和不可变动
+常见的有：
+可变的(variable)：
+	不可分享：/etc  /boot
+	可分享：/usr  /opt
+不可变的(static):
+	不可分享：/var/run  /var/lock
+	可分享：/var/mail  /var/spool/news
+
+最主要的三目录：
+/：与开机系统有关
+/usr:UNIX software resource,与软件安装/执行有关
+/var:与系统的运作有关
+
