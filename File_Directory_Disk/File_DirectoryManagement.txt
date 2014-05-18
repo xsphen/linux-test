@@ -1,0 +1,84 @@
+Linux文件和目录管理
+
+<1>目录与路径
+
+-比较特殊的目录有
+. 当前文件夹位置
+.. 上一层目录
+~ 当前用户组的主文件夹
+
+-目录的相关操作
+cd：Change Directory
+pwd：Print Working Directory，显示当前所在目录
+mkdir：-[mp] Directory name
+	-m：配置文件权限，比如mkdir -m 771 newDir
+	-p：递归创建文件夹，比如mkdir -p newDir/newDir1
+rmdir：-[p] Directory name，删除空文件夹
+	-p：递归删除空文件夹
+
+-执行文件路径的变量：$PATH
+	该变量由一堆目录组成，用冒号隔开。如果当前用户的PATH没有包含所需命令存在的目录，则可用绝对路径去执行。如果有相同的命令，则会执行第一个先被查询到的那个。
+
+<2>文件与目录管理
+
+-查看文件与目录：ls
+ls：-[adl] Directory name，adl是常用的参数
+	-a：全部的文件，连同隐藏文件
+	-d：仅列出目录本身，而不列出目录内的文件数据
+	-l：列出长数据传，包含文件的属性与权限等数据
+-复制，删除，移动：cp,rm,mv
+cp：-[air] source dest,注意复制文件后，复制而来的所有者会被改为进行复制操作的用户和用户组
+	-a：递归复制，包括文件的属性
+	-i：如果目标文件已经存在，会进行询问
+	-r：递归复制
+rm：-[fir] file/dir，删除
+	-f：force,强制移动
+	-i：询问
+	-r：递归删除
+mv：-[fiu] source dest，移动
+	-f：强制移动，如果文件已存在则直接覆盖
+	-i：询问
+	-u：若目标文件存在，且source较新时才会更新
+	mv还可以拿来更改文件名，比如mv filename1 filename2
+basename：获得最后的文件名
+dirname：取得目录名
+
+<3>文件内容查询
+
+cat：contendate,直接读取文本文件
+tac：与cat相反，读文件内容从后往前显示
+nl：-[bnw] 添加行好打印
+
+more：读取部分内容，enter向下翻一行，space向下翻一页，/字符串进行查询
+less：读取部分内容，支持向上和向下翻页，以及?/查询
+
+head：取出前面几行，默认选前10行
+	-n number：显示前number行，如果是-number，则不显示倒数number行
+tail：取出后面几行，默认选后10行
+	-n number：显示后number行，如果是+number，则不显示前number行
+
+<4>修改文件时间或创建新文件：touch
+Linux下主要的时间参数有：
+modification time(mtime)：指文件内容被更改的时间
+status time(ctime)：指文件权限与属性等状态被改变的时间
+access time(atime)：指文件被读取的时间
+默认情况下，ls显示出来的是文件的mtime，可以使用touch来修改时间参数，但不可以修改ctime。touch还可以用来新建空文件。
+
+<5>文件默认权限和隐藏权限
+-文件的默认权限跟umask有关，普通用户创建的文件默认666，而umask则默认为002，所以在默认情况下，普通用户创建的文件的权限为(-rw-rw-rw-)-(--------w-)=(-rw-rw-r--)
+-文件的隐藏属性：主要跟安全性有关，命令有chattr, lsattr
+
+<6>文件的特殊权限：SUID,SGID,SBIT
+SUID：仅对二进制程序有效，执行者对于该程序需要具有x的可执行权限，本权限仅在执行该程序的过程中有效，执行者将具有该程序所有者的权限（执行时临时获得的权限）。
+SGID：对二进制程序有效，执行者对于该程序需要具有x的可执行权限，执行者在执行的过程中将会获得该程序用户组的支持。所以执行者在此时创建的文件与此目录的用户组是一致的。
+SBIT：只对目录有效。当用户对于此目录具有w，x权限，在该目录下创建文件或目录时，只有root和自己才能删除该文件。
+设置方法：SUID/SGID/SBIT  4/2/1
+
+<7>查看文件类型：file
+
+<8>命令与文件的查询
+-which：+ 脚本文件名（例如which ls），只可以查询当前用户的PATH里所包含的执行文件
+-whereis：寻找指定文件名
+-locate：可以支持正则表达式的显示方式，和whereis都属于数据库查询，速度较快。更新数据库用updatedb
+-find：磁盘上的查询，速度较慢。find [path] [option] [action]，例如find . -mtine 0表示当前目录中今天内被内容被修改过的文件，find . -mtime +4则表示4天以前（不包括四天前那天）,find . -mtime -4则表示四天以内，包括四天前那天。还有-name,-size,-perm等有用的参数
+
