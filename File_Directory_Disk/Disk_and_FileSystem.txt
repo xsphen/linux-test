@@ -1,0 +1,51 @@
+Linux磁盘与文件系统管理
+
+-磁盘物理组成及分区的基本概念
+扇区(Sector)是最小的物理存储单位，大小为512bytes，将扇区组成一个圆，就是柱面(Cylinder)，柱面是分区的最小单位。
+第一个扇区存储了硬盘主引导记录(MasterBootRecord,MBR)和分区表(Partition Table),大小分别是446bytes和64bytes。分区表只能分为4个记录，称之为主分区或拓展分区。拓展分区还可以分出逻辑分区。
+
+<1>认识EXT文件系统
+-Ext2是Linux的传统文件系统(Linux second Extended file sysem,Ext2fs)
+
+-文件系统的基本部分
+1.inode
+记录文件的属性，权限等，一个文件占用一个inode
+2.block
+实际记录文件的内容
+3.superblock
+记录文件的整体信息，比如inode/block的总量，使用量，剩余量以及文件系统的格式等信息
+4.索引式文件系统(indexed allocation)，通过inode查询对应的block。而U盘(FAT)是采用类似“链表”的形式，block的读取是按“链表”顺序进行的。
+5.在linux文件系统中，第一个扇区是启动扇区，其余扇区被分成多个block group。通常第一个block group里包含了superblock，用来存储文件系统的相关信息。其余的block group可能含有superblock的副本，可用于恢复文件系统。如果superblock死了，很可能导致整个文件系统也死了。
+6.block group的组成
+data block：存储数据，block的大小有3种，1KB，2KB和4KB，最大单一文件限制分别为16GB,256GB,2TB，最大文件系统总容量为2TB,8TB,16TB。block的大小和数量在格式化完后就不能再改变了，每个block只能放置一个文件的数据，这意味着如果一个文件的大小为24bytes，block的大小为1KB,则浪费了1024-24=1000bytes！
+inode table：存储文件的信息，比如权限(rwx)，拥有者(owner/group)，文件大小，ctime/mtime/atime等。inode固定大小为128bytes。inode记录一个block号码需要4bytes，如果文件block数大，128bytes最多只能存32个block的索引？答案是否定的，inode可以存储12个直接block，一个间接block，一个双间接block和一个三简介block。如果一个block是1KB，则inode可以索引12 + 1024/4 + (1024/4)^2 + (1024/4)^3 ~ 16GB。
+superblock：block和inode的总量，大小，使用和未使用量
+File System Description（文件系统描述）：记录每个block group开始与结束的block号码以及说明每个分区分别介于哪一个block号码之间
+block bitmap/inode bitmap：位图，用来记录哪些编号的block/inode是否以及被使用
+7.df可以查看当前挂载的所有设备，dumpe2fs [-bh] deviceName可以查看设备的相关信息
+
+-文件系统与目录树的关系
+目录：当新建一个目录时，文件系统会分配一个inode和一个block给该目录，inode用于记录该目录的权限和属性等，block则用于记录在这个目录下的文件名与该文件名占用的inode号码数据。
+文件：文件系统会分配一个inode和根据文件大小分配所需的block数量，注意如果inode需要用到间接索引，还需要额外的block。
+目录树读取：文件系统会根据目录树一层一层按照inode/block往下找
+
+-Ext3：日志文件系统
+inode table/data block称为数据存放区域，superblock,block/inode bitmap称为meta data(中间数据)。
+日志文件系统可以在新建文件/文件夹时存储执行的步骤，如果系统突然崩溃，可以从日志文件中找到出现异常的文件。避免了利用e2fsck来进行整体检查，如果文件系统很大，这样是很费时的。
+
+-Linux文件系统的效率
+如果在编写大文件时，频繁地对数据写入磁盘，时间就浪费在等待磁盘的写入/读取上了，Linux的处理方式是异步处理(asynchronously),对于加载到内存上的文件，会被标记为clean或者dirty，clean表示该文件没有被修改过，dirty则相反。对于在内存中操作的文件，不会立刻被写入磁盘。可以用sync命令强制写入磁盘。
+
+-挂载(mount point)
+将文件系统与目录树结合的操作称为挂载，挂载点就是目录。
+
+-VFS
+virtual filesystem switch，虚拟文件系统，是一个内核功能，用来读取各种类型的文件系统。
+
+<2>文件系统的简单操作
+1.df：列出文件系统的整体磁盘使用量，默认不接参数为列出所有文件系统。常用的参数有-h以GB/MB/KB的形式列出，-i显示的是inode的使用情况。比如 df -hi /home
+2.du：评估文件系统的磁盘使用量（常用于评估目录所占容量），-s只列出当前目录而不列出子目录，注意此时 . 的容量里包括了子目录的容量。-S则列出 . 和它的子目录，这时 . 不包含子目录的容量。比如 du -s /home
+3.ln：连接文件。重要的参数有-s，默认情况下ln file1 file2是hard link，file2硬连接到file1，这时file2并不消耗文件系统的inode和block，它只是跟file1一样，指向相同的inode。如果删除file2，file1不受影响。注意hard link不可以用于连接目录，只可以连接文件（在ls -l里可以查看文件的连接数）。如果是ln -s file1 file2，则表明file2是一个快捷方式，会消耗inode和block，如果删除file1,file2就无法打开了。
+还要注意的是，如果当前目录是/home，其连接数是2，在此目录下新建一个目录/home/test，/home的连接数会加1，因为/home/test/..连接了/home！而/home/test的连接数为2而不是1，因为/home/test和/home/test/.都是连接到该目录的。
+
+
