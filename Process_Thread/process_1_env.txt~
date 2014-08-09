@@ -1,0 +1,53 @@
+# Advanced Programming in the UNIX Envinronment, Chapter 7
+
+1.main function
+int main(int argc, char *argv[]);
+argc是命令行参数的数目，argv是指向参数的各个指针所构成的数组
+
+2.进程终止方法
+-正常终止：
+(1)从main返回
+(2)调用exit
+(3)调用_exit或_Exit
+(4)最后一个线程从其启动例程返回
+(5)最后一个线程调用pthread_exit
+
+-异常终止：
+(6)调用abort
+(7)接到一个信号并终止
+(8)最后一个线程对取消请求做出响应
+
+-exit和_exit/_Exit的区别：
+_exit/_Exit立即进入内核，exit则先执行一些清理处理（调用执行各终止处理程序，关闭所有标准IO流等），然后再进入内核。exit()执行的标准I/O库的清理关闭操作会造成缓冲的输出数据被冲洗（比如为打开流调用fclose()，则数据被写到文件上）
+void exit(int status),void _Exit(int statsu) -- #include <stdlib.h>
+void _exit(int status) -- #include <unistd.h>
+exit(0) ~ return 0;
+
+-atexit函数，一个进程可以等级多达32个函数，这些函数将由exit自动调用，这些函数称为终止处理程序(exit handler)，并调用atexit函数来等级这些函数
+int atexit(void (*func)(void)); -- #include <stdlib.h>
+
+-内核使程序执行的唯一方法是调用一个exec函数，进程自愿终止的唯一方法是显式调用_exit或_Exit和隐式调用（通过exit)
+
+3.环境表
+-每个程序都会接受到一张环境表，与参数表一样，环境表是一个字符指针数组。全局变量char **environ包含了该指针数组的地址。environ称为环境指针，环境由name=value形式组成，比如HOME=/home/acbron\0, 每一个字符串是以null字符为结束符的。
+-可以通过getenv和putenv函数访问特定环境变量，如果要查看整个环境，则必须用environ指针
+
+4.C程序的存储空间布局
+-正文段：CPU执行的机器指令，可共享的，只读。
+-初始化数据：明确赋初值的变量，例如函数声明之外的声明：int a = 3;
+-非初始化数据：被内核初始为0或空指针的部分，比如int a[3];
+-栈：自动变量以及每次函数调用时所需保存的信息（返回地址，寄存器等）
+-堆：用于动态分配内存。
+布局顺序从低地址到高地址：正文，初始化数据，非初始化数据，堆，栈，（命令行参数和环境变量）
+-可以用size filename查看程序的布局大小
+
+5.存储器分配
+- #include <stdlib.h>
+(1)malloc：分别指定字节数的存储区，此存储区的初始值不确定。void *malloc(size_t size)
+(2)calloc：与malloc相同，只不过初始值为0。void *calloc(size_t nobj, size_t size)
+(3)realloc：可以用于更改以前分配区的长度。如果该存储区后有足够的空间可供使用，则可在原存储区位置上向高地址方向扩充，如果没有足够的空间，则分配一个更大的空间，并将原有的内容复制到新分配的存储区，然后释放原存储区。 void *realloc(void *ptr, size_t newsize)
+-malloc,calloc,realloc都会实现字节对齐，用void free(*ptr)释放内存。
+-大多数实现所分配的存储空间比要求的要稍大一些，额外的空间用来记录管理信息（分配块的长度，指向下一块分配块的指针等）
+
+
+
