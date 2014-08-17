@@ -1,0 +1,29 @@
+# Advanced Programming in the UNIX Envinronment, Chapter 8
+
+5.exit Functions
+-进程正常终止的5种方式
+(1)在main函数内执行return
+(2)调用exit函数
+(3)调用_exit或_Exit函数（在UNIX中，这两个函数不清洗标准I/O流）
+(4)进程的最后一个线程在其启动例程中执行返回语句（该线程的返回值不会作为进程的返回值，进程在这种情况下以终止状态0返回）
+(5)进程的最后一个线程调用pthread_exit函数
+-进程异常终止的3种形式
+(1)调用abort
+(2)进程接收到某些信号（可由其自身，其他进程或内核产生，比如进程越出其地址空间访问存储单元或者除以0）
+(3)最后一个线程对取消(cancellation)请求作出响应
+-进程的任何终止方式都会执行内核中的同一段代码，操作包括关闭所有打开的描述符，释放它所用的存储器等
+-正常终止进程通过将其退出状态(exit status)作为参数传递给函数通知其父进程，异常终止则通过内核产生一个终止状态(terminate status)，而父进程则通过wait或waitpid取得终止状态。注意“退出状态”和“终止状态”两种不同的说法，在正常终止进程中，调用_exit会让内核将退出状态转换成终止状态
+-init进程领养：如果父进程比子进程先终止，子进程的父进程会改变为init进程
+-wait,waitpid可以获得终止进程的ID，终止状态，CPU使用时间总量等
+-僵死进程(zombie)：父进程未处理一个已经终止的子进程
+
+6.wait & waitpid Functions
+-调用wait,waitpid的进程可能出现的情况
+(1)所有子进程都在运行，则阻塞
+(2)如果有一个子进程已终止，正等待父进程获取其终止状态，则取得该子进程的终止状态并立即返回
+(3)如果该进程没有子进程，则返回错误
+-pid_t wait(int *statloc);
+ pid_t waitpid(pid_t pid, int *statloc, int options)
+ #include <sys/wait.h>, 成功返回进程ID，失败返回-1
+ int *statloc指向终止进程的终止状态，无需获得终止状态则将其设为NULL
+ wait,waitpid的区别在于，waitpid可以使调用者不阻塞，并且可以控制它所等待的进程，支持作业控制（通过设置参数pid的值）
