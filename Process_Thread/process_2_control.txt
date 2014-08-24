@@ -27,3 +27,11 @@
  #include <sys/wait.h>, 成功返回进程ID，失败返回-1
  int *statloc指向终止进程的终止状态，无需获得终止状态则将其设为NULL
  wait,waitpid的区别在于，waitpid可以使调用者不阻塞，并且可以控制它所等待的进程，支持作业控制（通过设置参数pid的值）
+-其他wait系统函数还有waitid(linux), wait3和wait4(bsd)
+
+7.竞争条件(Race Conditions)
+-多个进程尝试处理共同的数据，最终的结果取决于进程的执行顺序
+-解决竞争条件的方法：进程间通信(interprocess communication, IPC)
+# 有待验证8.13程序-设置标准输出缓存的结果
+
+8.exec Functions
