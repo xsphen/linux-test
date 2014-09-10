@@ -1,0 +1,41 @@
+Linux文件与文件系统的压缩和打包
+
+压缩命令
+只可以用来压缩，并且只可压缩单一文件
+1.gzip [-cdv#] filename
+-c: 将压缩的数据输出到屏幕上，可通过数据重定向来处理；
+	gzip -c filename > filename.gz
+-d: 解压缩（删除filename.gz, 生成压缩包里的文件）
+	gzip -c filename.gz
+-v: 压缩（删除文件，生成filename.gz）
+	gzip -v filename
+-#: #取值1～9，-1压缩速度最快，但压缩比低，-9压缩速度最慢，但压缩比最高。默认为-6
+	gzip -3 filename
+zcat filename：可以读取压缩包内的文本文件，和cat类似
+
+2.bzip2 [-cdkzv#] filename:
+-c, -d, -v, -#和gzip一样
+-z: 压缩
+-k: 压缩并保留原文件
+bzcat filename: 读取压缩包内的文本文件
+
+打包命令
+1.tar [-cxjzvfC] 
+-c: 新建打包文件
+-x: 解打包和解压缩
+-j: 以bzip2压缩
+-z: 以gzip压缩
+-v: 显示在解压/压缩过程中处理的文件名
+-f: 后加filename，即被处理的文件
+-C: 后加目录，在解压缩时压缩到特定目录
+-p: 保留原本文件的权限
+
+打包压缩：
+tar -jcv -f filename.tar.bz2 directory_name
+解打包压缩
+tar -jxv -f filename.tar.bz2 -C output_directory
+查询压缩包内信息
+tar -jtv -f filename.tar.bz2
+解压单一文件
+tar -jxv -f filename.tar.bz2 output_directory/target_file
+
