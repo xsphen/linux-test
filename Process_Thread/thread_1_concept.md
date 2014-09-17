@@ -87,3 +87,40 @@ rtn被执行的条件有：
 	int pthread_detach(pthread_t tid); //成功返回0，否则返回错误编码
 
 在默认情况下，线程的终止状态会保存直到对该线程调用`pthread_join`。如果线程已经被分离，线程的底层存储资源可以在线程终止时立即被收回。先线程被分离后，我们不能用`pthread_join`函数等待它的终止状态，因为对分离状态的线程调用`pthread_join`会产生未定义行为。可以通过上述的`pthread_detach`分离线程
+
+### 线程同步
+
+线程需要同步的原因：
+
+* 当一个线程修改变量时，其他线程在读取这个变量的时可能会看到一个不一致的值
+* 当两个或多个线程试图在同一时间修改同一变量时，变量的值可能与预期不一样
+* 程序使用变量的方式并非原子操作
+
+**互斥量（mutex）**
+
+互斥量本质上是一把锁，在访问共享资源前对互斥量进行设置，在访问完成后释放互斥量，确保同一时间只有一个线程访问数据。任何试图再次对互斥量在锁的线程都会被阻塞直到当前线程释放互斥量
+
+互斥量用`pthread_mutex_t`数据类型表示，在使用互斥变量以前，必须首先对它进行初始化，可以把它设为常量`PTHREAD_MUTEX_INITIALIZER`（只适用于静态分配的互斥量），也可以通过调用`pthread_mutex_init`函数进行初始化。如果动态分配互斥量，在释放内存前需要调用`pthread_mutex_destroy`
+
+	#include <pthread.h>
+	int pthread_mutex_init(pthread_mutex_t *restrict mutex,
+			const pthread_mutexattr_t *restrict attr);
+	int pthread_mutex_destroy(pthread_mutex_t *mutex);
+	//两个函数成功都返回0，否则返回错误号
+
+要用默认的属性初始化互斥量，只需把`pthread_mutex_init`的`attr`参数设置为`NULL`
+
+对互斥量加锁的方法：
+
+	#include <pthread.h>
+	int pthread_mutex_lock(pthread_mutex_t *mutex);
+	int pthread_mutex_trylock(pthread_mutex_t *mutex);
+	int pthread_mutex_unlock(pthread_mutex_t *mutex);
+	//成功返回0，否则返回错误号
+
+如果线程不希望被阻塞，可以通过`pthread_mutex_trylock`尝试对互斥量进行加锁
+
+**避免死锁**
+
+
+
