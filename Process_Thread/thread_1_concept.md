@@ -122,5 +122,79 @@ rtn被执行的条件有：
 
 **避免死锁**
 
+死锁出现的原因：
 
+* 一个线程试图对同一个互斥量加锁两次，那么它自身就会陷入死锁状态
+* 程序中使用一个以上的互斥量时，如果允许一个线程一直占有第一个互斥量，并且在试图锁住第二个互斥量时处于阻塞状态，但是拥有第二个互斥量的线程也在试图锁住第一个互斥量
 
+对于有多个互斥量的程序，可以尝试用`pthread_mutex_trylock`来获得被锁住的资源；也可以通过让互斥量的加锁顺序严格执行来保证不出现死锁
+
+在多线程设计中，通常锁的粒度粗会让程序在实现和阅读上都得到简化，但是粒度太粗会出现很多线程阻塞等待相同的锁，导致并发性低下；相反，锁的粒度细会让程序变得复杂，并且过多锁的开销会使系统性能收到影响
+
+**函数 `pthread_mutex_timelock`**
+
+	#include <pthread.h>
+	#include <time.h>
+	int pthread_mutex_timelock(pthread_mutex_t *restrict mutex, 
+				const struct timespec *restrict tsptr);//成功返回0，否则返回错误编号
+
+超时指定愿意等待的绝对时间（与相对时间对比而言，指定在时间X之前可以阻塞等待，而不是说愿意等待Y秒）
+
+**读写锁（reader-writer lock）**
+
+读写锁比起互斥量来说具有更高的并发性，特别是在对数据结构的读的次数远大于写的次数时。
+
+> 读写锁有三种状态，写模式加锁，读模式加锁和不加锁
+> 
+> 读写锁在读加锁状态时，所有试图以读模式对它进行加锁的线程都可以得到访问权，但以写模式对它进行加锁的线程会被阻塞
+> 
+> 如果读写锁在写枷锁状态，则所有模式（包括读和写）的加锁都会被阻塞
+
+读写锁在使用前需要初始化，`pthread_rwlock_init`是动态分配读写锁时需要初始化的操作，同时在释放读写锁占有的资源的时候，需要先用`pthread_rwlock_destroy`进行清理，再执行释放读写锁。在静态分配的读写锁中，可以通过`PTHREAD_RWLOCK_INITIALIZER`常量进行初始化
+
+	#include <pthread.h>
+	int pthread_rwlock_init(pthead_rwlock_t *restrict rwlock,
+				const pthread_rwlockattr_t *restrict attr);
+	int pthread_rwlock_destroy(pthread_rwlock_t *rwlock); //以上函数成功均返回0
+
+读写锁的加锁和解锁方法为
+
+	#include <pthread.h>
+	int pthread_rwlock_rdlock(pthread_rwlock_t *rwlock);
+	int pthread_rwlock_wrlock(pthread_rwlock_t *rwlock);
+	int pthread_rwlock_unlock(pthread_rwlock_t *rwlock);//以上函数成功均返回0
+
+与互斥量一样，读写锁也包含其他的请求锁方法以及避免死锁的方法
+
+	#include <pthread.h>
+	#include <time.h>
+	int pthread_rwlock_tryrdlock(pthread_rwlock_t *rwlock);
+	int pthread_rwlock_trywrlock(pthread_rwlock_t *rwlock);
+	int pthread_rwlock_timerdlock(pthread_rwlock_t *restrict rwlock,
+				const struct timespec *restrict tsptr);
+	int pthread_rwlock_timewrlock(pthread_rwlock_t *restrict rwlock,
+				const struct timespec *restrict tsptr);//以上函数成功均返回0
+
+**条件变量**
+
+条件变量是线程可用的另一种同步机制，通常与互斥量配合使用。通过条件变量，可以使等待条件的线程挂起，直到需要打条件达到
+
+	#include <pthread.h>
+	int pthread_cond_init(pthread_cont_t *restrict cond,
+			const pthread_condattr_t *restrict attr);
+	int pthread_cond_destroy(pthread_cont_t *cond);//两个函数成功都返回0，静态分配用PTHREAD_COND_INITIALIZER初始化
+
+等待条件的方法
+
+	#include <pthread.h>
+	int pthread_cond_wait(pthread_cond_t *restrict cond,
+			pthread_mutex_t *restrict mutex);
+	int pthread_cond_timewait(pthread_cond_t *restrict cond,
+			pthread_mutex_t *restrict mutex,
+			const struct timespec *restrict tsptr);//成功返回0
+
+唤醒提线程的方法
+
+	#include <pthread
+	int pthread_cont_signal(pthread_cond_t *cond);
+	int pthread_cond_broadcost(pthread_cond_t *cond);
