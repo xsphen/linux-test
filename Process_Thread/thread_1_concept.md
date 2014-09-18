@@ -50,6 +50,7 @@
 
 	#include <pthread.h>
 	void pthread_exit(void *rval_ptr);
+	
 	int pthread_join(pthread_t thread, void **rval_ptr);//成功返回0，否则返回错误编码
 
 `pthread_exit`用来终止线程，若线程从启动例程中返回，则`rval_ptr`包含返回码，如果线程被取消，则`rval_ptr`所指的内存单元就被设置为`PTHREAD_CANCELED`
@@ -63,12 +64,13 @@
 	#include <pthread.h>
 	int pthread_cancel(pthread_t tid); //成功返回0，否则返回错误编码
 
-值得注意的是，`pthread_cancel`只是提出一个“取消建议”，最终是否取消取决于线程ID为`tid`
+值得注意的是，`pthread_cancel`只是提出一个“取消建议”，最终是否取消取决于线程ID为`tid`的线程
 
 **方法三：**
 
 	#include <pthread.h>
 	void pthread_cleanup_push(void (*rtn)(void *), void *arg);
+	
 	void pthread_cleanup_pop(int execute);
 
 跟进程的`atexit`函数一样，线程也拥有可以安排它退出是需要调用的函数，该函数称之为*线程清理处理程序（thread cleanup handler）*，注意该清理函数的执行顺序跟注册时相反
@@ -76,7 +78,7 @@
 rtn被执行的条件有：
 
 * 线程调用`pthread_exit`
-* 线程相应取消请求
+* 线程响应取消请求
 * execute != 0的`pthread_cleanup_pop`调用
 
 注：当线程从启动线程中返回时，rtn不会被执行！
@@ -105,6 +107,7 @@ rtn被执行的条件有：
 	#include <pthread.h>
 	int pthread_mutex_init(pthread_mutex_t *restrict mutex,
 			const pthread_mutexattr_t *restrict attr);
+	
 	int pthread_mutex_destroy(pthread_mutex_t *mutex);
 	//两个函数成功都返回0，否则返回错误号
 
@@ -114,7 +117,9 @@ rtn被执行的条件有：
 
 	#include <pthread.h>
 	int pthread_mutex_lock(pthread_mutex_t *mutex);
+	
 	int pthread_mutex_trylock(pthread_mutex_t *mutex);
+	
 	int pthread_mutex_unlock(pthread_mutex_t *mutex);
 	//成功返回0，否则返回错误号
 
@@ -155,6 +160,7 @@ rtn被执行的条件有：
 	#include <pthread.h>
 	int pthread_rwlock_init(pthead_rwlock_t *restrict rwlock,
 				const pthread_rwlockattr_t *restrict attr);
+	
 	int pthread_rwlock_destroy(pthread_rwlock_t *rwlock); //以上函数成功均返回0
 
 读写锁的加锁和解锁方法为
@@ -169,9 +175,12 @@ rtn被执行的条件有：
 	#include <pthread.h>
 	#include <time.h>
 	int pthread_rwlock_tryrdlock(pthread_rwlock_t *rwlock);
+	
 	int pthread_rwlock_trywrlock(pthread_rwlock_t *rwlock);
+	
 	int pthread_rwlock_timerdlock(pthread_rwlock_t *restrict rwlock,
 				const struct timespec *restrict tsptr);
+	
 	int pthread_rwlock_timewrlock(pthread_rwlock_t *restrict rwlock,
 				const struct timespec *restrict tsptr);//以上函数成功均返回0
 
@@ -182,6 +191,7 @@ rtn被执行的条件有：
 	#include <pthread.h>
 	int pthread_cond_init(pthread_cont_t *restrict cond,
 			const pthread_condattr_t *restrict attr);
+	
 	int pthread_cond_destroy(pthread_cont_t *cond);//两个函数成功都返回0，静态分配用PTHREAD_COND_INITIALIZER初始化
 
 等待条件的方法
@@ -189,6 +199,7 @@ rtn被执行的条件有：
 	#include <pthread.h>
 	int pthread_cond_wait(pthread_cond_t *restrict cond,
 			pthread_mutex_t *restrict mutex);
+	
 	int pthread_cond_timewait(pthread_cond_t *restrict cond,
 			pthread_mutex_t *restrict mutex,
 			const struct timespec *restrict tsptr);//成功返回0
@@ -197,4 +208,22 @@ rtn被执行的条件有：
 
 	#include <pthread
 	int pthread_cont_signal(pthread_cond_t *cond);
+	
 	int pthread_cond_broadcost(pthread_cond_t *cond);
+
+**屏障**
+
+屏障（barrier）是用户协调多个线程并行工作的机制。屏障允许每个线程等待，知道所有的合作线程都达到某一点，然后从该点继续执行。
+
+`pthread_join`就是一种屏障，只不过其只允许一个线程等待，直到另一个线程退出。屏障则允许任意多个线程等待，直到所有的线程完成处理工作，而线程不需要退出。
+
+屏障的方法有：
+
+	#include <pthread.h>
+	int pthread_barrier_init(pthread_barrier_t *restrict barrier,
+			const pthread_barrierattr_t *restrict attr,
+			unsigned int count);
+	
+	int pthread_barrier_destroy(pthread_barrier_t *barrier);
+	
+	int pthread_barrier_wait(pthread_barrier_t *barrier);
