@@ -1,0 +1,127 @@
+## Linux Common Command Line
+
+**文件操作**
+
+(1) `wc`：统计指定文件中的行数，单词数，字节数(按顺序)
+
+> format: `wc -options filename`
+
+> options: c,l,m,w,L
+
+> -c 统计字节数
+
+> -l 统计行数
+
+> -m 统计字符数
+
+> -w 统计字数
+
+> -L 打印最长行的长度
+
+用wc只打印统计数字而不打印文件
+
+> `cat file | wc -l`
+
+统计当前目录下的文件数
+
+> `ls -l | wc -l`
+
+(2) `cut`：在文件中剪切数据，以每一行作为处理对象
+
+> format: `cut -options number1-number2 filename`
+
+> options: b,c,f
+
+> -b 剪切字节，注意一个中文字符等于三个字节
+
+> -c 剪切字符
+
+> -f 剪切域
+
+> example: `date | cut -b 1-4`
+
+> output: 2014
+
+(3) file: 查看文件类型
+
+> format: `file filename`
+
+(4) sed：一次处理一行数据的在线编辑器，首先把当前处理的行存储在临时缓冲区，接着用`sed`处理缓冲区的内容，处理完成后把内容送往屏幕。操作不改变原文件内容
+
+> format: `sed -options action`
+
+> action: a, c, d, i, s
+
+> a: cat filename.txt | sed '2a this is added in line 3' —— 往第二行后面增加内容
+
+> i: cat filename.txt | sed '2i this is added in line 2' —— 往第二行前面增加内容
+
+> c: cat filename.txt | sed '2,3c I replace line 2 and line 3' —— 把第二，三行的内容替换掉
+
+> d: cat filename.txt | sed '2,3d' —— 删除第二，三行内容
+
+> s: cat filename.txt | sed '1,2s/string1/string2/g' —— 把第一到第二行的string1替换成string2
+
+**进程操作**
+
+(1) top：动态显示过程
+
+(2) kill：杀死进程
+
+> format: `kill process_id` or `kill -options process_id`
+
+> options: 1,2,9,15
+
+> -1: 重新读取一次参数的配置文件
+
+> -2: 代表与由键盘输入`ctrl + c`同样的操作
+
+> -9: 立刻强制删除一个工作
+
+> -15: 以正常方式终止一项工作
+
+> example: kill 9527
+
+> example: kill -9 %3 (强制退出编号为3的后台进程)
+
+(3) &: 让进程在后台运行，完成后在终端显示完成的消息
+
+> example: `cp file1 file2 &`
+
+(4) jobs: 查看后台工作状态
+
+> format: `jobs`
+
+(5) fg：将后台工作拿到前台来处理
+
+> format: `fg %number`
+
+(6) bg: 将工作在后台下的状态变成运行中
+
+> format: `bg %number`
+
+(7) ps: 静态查看进程
+
+> example: `ps -l` 查看当前bash下的进程
+
+> example: `ps aux` 查看所有进程
+
+> example: `ps -lA` 查看所有进程
+
+> example: `ps axjf` 查看所有进程，包括部分进程树
+
+**例行性工作**
+
+(1) crontab: 循环执行工作（`crontab -e`）
+
+> format: `minute hour day month year do_some_thing`
+
+> 如果要每五分钟干一次，则可以在前面添加`*/5 * * * * do_some_thing`
+
+> 注意到不需要的时间点用*代替
+
+(2) at：单一执行工作（`at time`）
+
+> format: `at HH:MM YYYY:MM:DD` , 也可以 `at now + 5 minutes`
+
+> 输入完命令后以`ctrl + d`结束
